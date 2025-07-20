@@ -40,7 +40,6 @@ interface FilterOptions {
   styleUrls: ['./graph.component.css']
 })
 export class GraphComponent implements OnInit {
-  // Данные продуктов
   data: FoodItem[] = [
     {
       name: "облепиха",
@@ -78,7 +77,6 @@ export class GraphComponent implements OnInit {
   private prepareGraphData(): void {
     const allNodes = new Map<string, Node>();
     
-    // Собираем все узлы
     this.data.forEach(item => {
       allNodes.set(item.name, {
         id: item.name,
@@ -86,7 +84,6 @@ export class GraphComponent implements OnInit {
         category: item.category
       });
 
-      // Добавляем связанные узлы
       ['red', 'orange', 'green', 'blue'].forEach(color => {
         const items = item[color as keyof FoodItem] as string[] || [];
         items.forEach(targetName => {
@@ -103,7 +100,6 @@ export class GraphComponent implements OnInit {
 
     this.graph.nodes = Array.from(allNodes.values());
 
-    // Создаем связи
     this.graph.links = [];
     this.data.forEach(sourceItem => {
       ['red', 'orange', 'green', 'blue'].forEach(color => {
@@ -124,7 +120,6 @@ export class GraphComponent implements OnInit {
   private applyFilter(): void {
     const visibleNodes = new Set<string>();
     
-    // Фильтруем связи и собираем видимые узлы
     this.filteredLinks = this.graph.links.filter(link => {
       const shouldShow = this.shouldShowLink(link);
       if (shouldShow) {
@@ -134,7 +129,6 @@ export class GraphComponent implements OnInit {
       return shouldShow;
     });
 
-    // Помечаем скрытые узлы
     this.graph.nodes.forEach(node => {
       node.hidden = !visibleNodes.has(node.id);
     });
@@ -155,101 +149,133 @@ export class GraphComponent implements OnInit {
   private renderGraph(): void {
     d3.select('#graph-container').selectAll('*').remove();
 
+    // Создаем SVG с контейнером для zoom
     this.svg = d3.select('#graph-container')
       .append('svg')
       .attr('width', '100%')
       .attr('height', '600px')
       .attr('viewBox', '0 0 800 600');
 
-    // Получаем только видимые узлы
-    const visibleNodes = this.graph.nodes.filter(node => !node.hidden);
+    const container = this.svg.append('g').classed('container', true);
 
-    // Преобразуем связи для D3 (string -> Node)
+    // Настройка zoom
+    const zoom = d3.zoom()
+      .scaleExtent([0.5, 3])
+      .on('zoom', (event) => {
+        container.attr('transform', event.transform);
+      });
+
+    this.svg.call(zoom);
+
+    const visibleNodes = this.graph.nodes.filter(node => !node.hidden);
     const d3Links = this.filteredLinks.map(link => ({
       source: visibleNodes.find(n => n.id === link.source)!,
       target: visibleNodes.find(n => n.id === link.target)!,
       value: link.value
     }));
 
-    // Создаем симуляцию только с видимыми узлами
-  this.simulation = d3.forceSimulation<Node>(visibleNodes)
-    .force('link', d3.forceLink(d3Links)
-      .id(d => (d as Node).id)
-      .distance(100) // Оптимальное расстояние между связанными узлами
-    )
-    .force('charge', d3.forceManyBody()
-      .strength(-200) // Увеличили силу отталкивания
-    )
-    .force('collision', d3.forceCollide()
-      .radius(35) // Радиус с учетом текста
-      .strength(1) // Максимальная сила столкновений
-    )
-    .force('center', d3.forceCenter(400, 300));
+    // Симуляция с оптимизированными параметрами
+    this.simulation = d3.forceSimulation<Node>(visibleNodes)
+      .force('link', d3.forceLink(d3Links)
+        .id(d => (d as Node).id)
+        .distance(100)
+      )
+      .force('charge', d3.forceManyBody()
+        .strength(-150)
+      )
+      .force('collision', d3.forceCollide()
+        .radius(35)
+        .strength(0.8)
+      )
+      .force('x', d3.forceX(400).strength(0.05))
+      .force('y', d3.forceY(300).strength(0.05))
+      .alphaDecay(0.05)
+      .velocityDecay(0.4);
 
     // Рисуем связи
-    const link = this.svg.append('g')
+    const link = container.append('g')
       .selectAll('line')
       .data(d3Links)
       .enter()
       .append('line')
-      .attr('stroke', (d: { value: string }) => this.getCompatibilityColor(d.value))
-      .attr('stroke-width', 2);
+      .attr('stroke', (d: { value: string; }) => this.getCompatibilityColor(d.value))
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.7);
 
     // Рисуем узлы
-    const node = this.svg.append('g')
+    const node = container.append('g')
       .selectAll('circle')
       .data(visibleNodes)
       .enter()
       .append('circle')
       .attr('r', 15)
-      .attr('fill', (d: Node) => this.getCategoryColor(d.category))
+      .attr('fill', (d: { category: string; }) => this.getCategoryColor(d.category))
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.5)
       .call(d3.drag<SVGCircleElement, Node>()
         .on('start', (event, d) => this.dragStarted(event, d))
         .on('drag', (event, d) => this.dragged(event, d))
         .on('end', (event, d) => this.dragEnded(event, d)));
 
-    // Подписи узлов
-    const text = this.svg.append('g')
-      .selectAll('text')
+    // Рисуем текст с переносами
+    const text = container.append('g')
+      .selectAll('g.text-node')
       .data(visibleNodes)
       .enter()
-      .append('text')
-      .attr('dy', -20)
-      .attr('text-anchor', 'middle')
-      .text((d: Node) => d.name)
-      .attr('fill', '#333')
-      .attr('font-size', '12px');
-
-      const zoom = d3.zoom()
-  .scaleExtent([0.5, 2])
-  .on('zoom', (event) => {
-    this.svg.selectAll('g').attr('transform', event.transform);
-  });
-
-this.svg.call(zoom);
+      .append('g')
+      .classed('text-node', true)
+      .call(this.wrapText, 60);
 
     // Обновление позиций
     this.simulation.on('tick', () => {
       // Ограничиваем позиции узлов
-      node.each((d: { x: number; y: number; }) => {
-        d.x = Math.max(30, Math.min(770, d.x ?? 400));
-        d.y = Math.max(30, Math.min(570, d.y ?? 300));
+      visibleNodes.forEach(node => {
+        node.x = Math.max(50, Math.min(750, node.x ?? 400));
+        node.y = Math.max(50, Math.min(550, node.y ?? 300));
       });
 
       link
-        .attr('x1', (d: { source: Node }) => d.source.x ?? 0)
-        .attr('y1', (d: { source: Node }) => d.source.y ?? 0)
-        .attr('x2', (d: { target: Node }) => d.target.x ?? 0)
-        .attr('y2', (d: { target: Node }) => d.target.y ?? 0);
+        .attr('x1', (d: { source: { x: any; }; }) => d.source.x ?? 0)
+        .attr('y1', (d: { source: { y: any; }; }) => d.source.y ?? 0)
+        .attr('x2', (d: { target: { x: any; }; }) => d.target.x ?? 0)
+        .attr('y2', (d: { target: { y: any; }; }) => d.target.y ?? 0);
 
       node
-        .attr('cx', (d: Node) => d.x ?? 0)
-        .attr('cy', (d: Node) => d.y ?? 0);
+        .attr('cx', (d: { x: any; }) => d.x ?? 0)
+        .attr('cy', (d: { y: any; }) => d.y ?? 0);
 
       text
-        .attr('x', (d: Node) => d.x ?? 0)
-        .attr('y', (d: Node) => d.y ?? 0);
+        .attr('transform', (d: { x: any; y: any; }) => `translate(${d.x ?? 0},${d.y ?? 0})`);
     });
+  }
+
+  private wrapText(selection: any, width: number) {
+    selection.each(function(this: SVGGElement, d: Node) {
+      const g = d3.select(this);
+      g.selectAll('*').remove();
+      
+      const words = d.name.split(/\s+/);
+      const lineHeight = 1.1;
+      const fontSize = 10;
+      let y = 25;
+      
+      let tspan = g.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('font-size', `${fontSize}px`)
+        .attr('fill', '#333')
+        .selectAll('tspan')
+        .data(words)
+        .enter()
+        .append('tspan')
+        .attr('x', 0)
+        .attr('y', (_, i) => y + i * fontSize * lineHeight)
+        .text(word => word);
+    });
+  }
+
+  getFilterValue(color: string): boolean {
+    const key = `show${color.charAt(0).toUpperCase()}${color.slice(1)}` as keyof FilterOptions;
+    return this.filter[key];
   }
 
   toggleFilter(color: string): void {
@@ -274,7 +300,8 @@ this.svg.call(zoom);
       'специи': '#feca57',
       'фрукты': '#1dd1a1',
       'овощи': '#54a0ff',
-      'напитки': '#5f27cd'
+      'напитки': '#5f27cd',
+      '?': '#8395a7'
     };
     return colors[category as keyof typeof colors] || '#8395a7';
   }
@@ -294,10 +321,5 @@ this.svg.call(zoom);
     if (!event.active && this.simulation) this.simulation.alphaTarget(0);
     d.fx = null;
     d.fy = null;
-  }
-
-  getFilterValue(color: string): boolean {
-    const key = `show${color.charAt(0).toUpperCase()}${color.slice(1)}` as keyof FilterOptions;
-    return this.filter[key];
   }
 }
