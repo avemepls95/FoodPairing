@@ -25,6 +25,10 @@ interface Link {
   value: 'red' | 'orange' | 'green' | 'blue';
 }
 
+interface GraphSettings {
+  mode: 'strict' | 'extended'; // Два режима отображения
+}
+
 interface FilterOptions {
   showRed: boolean;
   showOrange: boolean;
@@ -167,6 +171,10 @@ export class GraphComponent implements OnInit {
     showBlue: true
   };
 
+  settings: GraphSettings = {
+    mode: 'extended' // По умолчанию расширенный режим
+  };
+
   ngOnInit(): void {
     this.prepareGraphData();
     this.groupProducts();
@@ -217,23 +225,54 @@ export class GraphComponent implements OnInit {
     this.applyFilter();
   }
 
-  private applyFilter(): void {
-    const visibleNodes = new Set<string>();
-    
-    this.filteredLinks = this.graph.links.filter(link => {
-      const shouldShow = this.shouldShowLink(link);
-      if (shouldShow) {
-        visibleNodes.add(link.source);
-        visibleNodes.add(link.target);
+  applyFilter(): void {
+    // 1. Фильтрация связей по цвету
+    let visibleLinks = this.graph.links.filter(link => 
+      this.shouldShowLink(link)
+    );
+
+    // 2. Применяем фильтр по продуктам (если есть выбранные)
+    if (this.selectedProducts.length > 0) {
+      const selectedSet = new Set(this.selectedProducts);
+      
+      if (this.settings.mode === 'strict') {
+        // Режим 1: Только выбранные узлы и связи между ними
+        visibleLinks = visibleLinks.filter(link => 
+          selectedSet.has(link.source) && selectedSet.has(link.target)
+        );
+      } else {
+        // Режим 2: Выбранные узлы + их непосредственные связи
+        visibleLinks = visibleLinks.filter(link => 
+          selectedSet.has(link.source) || selectedSet.has(link.target)
+        );
       }
-      return shouldShow;
+    }
+
+    this.filteredLinks = visibleLinks;
+    this.updateNodesVisibility();
+    this.renderGraph();
+  }
+
+  private updateNodesVisibility(): void {
+    const visibleNodes = new Set<string>();
+
+    // Всегда показываем выбранные узлы (даже в strict режиме)
+    this.selectedProducts.forEach(node => visibleNodes.add(node));
+
+    // Добавляем узлы из видимых связей
+    this.filteredLinks.forEach(link => {
+      visibleNodes.add(link.source);
+      visibleNodes.add(link.target);
     });
 
     this.graph.nodes.forEach(node => {
       node.hidden = !visibleNodes.has(node.id);
     });
+  }
 
-    this.renderGraph();
+  toggleViewMode(): void {
+    this.settings.mode = this.settings.mode === 'strict' ? 'extended' : 'strict';
+    this.applyFilter();
   }
 
   private shouldShowLink(link: Link): boolean {
@@ -384,7 +423,11 @@ export class GraphComponent implements OnInit {
   toggleFilter(color: string): void {
     const key = `show${color.charAt(0).toUpperCase()}${color.slice(1)}` as keyof FilterOptions;
     this.filter[key] = !this.filter[key];
+    
+    // Сохраняем выбранные продукты при обновлении
+    const currentSelected = [...this.selectedProducts];
     this.applyFilter();
+    this.selectedProducts = currentSelected;
   }
 
   getCompatibilityColor(value: string): string {
@@ -447,34 +490,6 @@ export class GraphComponent implements OnInit {
   })).sort((a, b) => a.category.localeCompare(b.category));
 }
 
-// Метод отображает выбранные узлы со всеми связаннными ( в том числе не выбранными)
-applyProductFilter(): void {
-  if (this.selectedProducts.length === 0) {
-    this.applyFilter();
-    return;
-  }
-
-  const visibleNodes = new Set<string>();
-  const visibleLinks: Link[] = [];
-
-  // Находим все связи для выбранных продуктов
-  this.graph.links.forEach(link => {
-    if (this.selectedProducts.includes(link.source) || 
-        this.selectedProducts.includes(link.target)) {
-      visibleNodes.add(link.source);
-      visibleNodes.add(link.target);
-      visibleLinks.push(link);
-    }
-  });
-
-  this.filteredLinks = visibleLinks;
-  this.graph.nodes.forEach(node => {
-    node.hidden = !visibleNodes.has(node.id);
-  });
-
-  this.renderGraph();
-}
-
 // Метод отображает только выбранные узлы (и связи между ними, если есть)
 applyProductFilter2(): void {
   if (this.selectedProducts.length === 0) {
@@ -514,7 +529,7 @@ toggleProductSelection(product: string): void {
     }))
   }));
 
-  this.applyProductFilter();
+    this.applyFilter();
 }
 
 // Фильтрация для поиска

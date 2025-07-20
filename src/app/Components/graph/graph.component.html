@@ -1,4 +1,4 @@
-    <div>
+<div>
     <div class="controls-container">
     <div class="filter-controls">
         <div class="color-filters">
@@ -11,6 +11,10 @@
         </label>
         </div>
     </div>
+
+    <button (click)="toggleViewMode()" class="mode-toggle">
+      Режим: {{settings.mode === 'strict' ? 'Точный' : 'Расширенный'}}
+    </button>
 
     <div class="product-filter">
         <div class="search-box">
@@ -32,7 +36,7 @@
         </div>
         </div>
 
-        <button (click)="selectedProducts = []; applyProductFilter()" 
+        <button (click)="selectedProducts = []; applyFilter()" 
                 class="clear-btn">
         Сбросить выбор
         </button>
