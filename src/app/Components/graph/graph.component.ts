@@ -43,7 +43,7 @@ export class GraphComponent implements OnInit {
   data: FoodItem[] = [
     {
       name: "облепиха",
-      category: "ягоды",
+      category: "Ягоды",
       orange: ["клубника", "апельсин", "сыр", "манго", "портвейн"],
       green: ["виноград", "клюква", "грейп", "салями", "папайя", "виски", "сидр"],
       blue: ["лавр", "какао", "гвоздика", "т. шоколад", "мандарин", "грени смит", 
@@ -51,121 +51,105 @@ export class GraphComponent implements OnInit {
     },
     {
       name: "абсент",
-      category: "напитки",
+      category: "Напитки",
       green: ["сл. вишня", "базилик", "п. мята", "шалфей", "мята", "бекон"],
       blue: ["лайм", "клюква", "мандарин", "канталуп", "эстрагон", "анис"]
     },
     {
       name: "попкорн",
-      category: "десерт",
+      category: "Десерт",
       orange: ["кофе"],
       green: ["какао", "вафли", "арахис", "хлеб", "сыр", "томат", "кукуруза", "ч. чай"],
       blue: ["клубника", "бергамот", "мед", "ваниль", "яблоко", "салями", "тыква", "лосось"]
     },
     {
-      name: "кислая вишня",
-      category: "ягоды",
+      name: "к. вишня",
+      category: "Ягоды",
       red: ["базилик"],
-      orange: ["корицы"],
-      green: ["сл. вишня", "клубника", "черника", "асаи", "клюква", "лавр", "эстрагон", "како", "т. шоколад", "гвоздика", "маракуя", "яблоко", "ч. чай", "портвейн", "жасмин"],
+      orange: ["корица"],
+      green: ["сл. вишня", "клубника", "черника", "асаи", "клюква", "лавр", "эстрагон", "какао", "т. шоколад", "гвоздика", "маракуя", "яблоко", "ч. чай", "портвейн", "жасмин"],
       blue: ["облепиха", "бойсенбери", "малина", "слива", "ежевика", "лайм", "грейп", "лемонграсс", "шалфей", "сливочный сыр", "карамель", "лакрица", "анис", "нектарин", "персик", "банан", "абрикос", "з. чай", "кофе", "виски", "роза"], 
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "абрикос",
+      category: "Фрукты",
+      red: ["оливки", "персик", "нектарин", "коньяк", "джин", "водка"],
+      orange: ["кр. сухое", "имб. пиво"],
+      green: ["клубника", "малина", "эстрагон", "манго", "маракуйя", "ром"],
+      blue: ["черника", "клюква", "виноград", "бергамот", "базилик", "чеддер", "салями", "банан", "слива", "ананас", "яблоко", "ч. чай", "портвейн", "шампанское", "бузина"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "апельсин",
+      category: "Цитрус",
+      red: [],
+      orange: ["манго", "мандарин", "водка"],
+      green: ["ч. чай", "грейпфрут", "гуава", "малина", "кр. сухое"],
+      blue: ["ч. смородина", "личи", "эстрагон", "базилик", "кардамон", "морковь", "папайа", "яблоко", "портвейн", "клюква", "сл. вишня", "брусника", "черника", "роза", "бузина", "кардамон"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "елки",
+      category: "Хвоя",
+      red: ["можжевельник", "арахис", "джин"],
+      orange: ["базилик"],
+      green: ["ч. перец", "лемонграсс", "эастргон", "бекон", "салями", "морковь", "манго", "кардамон"],
+      blue: ["сл. вишня", "лимон", "мандарин", "грейпфрут", "бергамот", "лавр", "анис", "корица", "чили", "абсент", "водка"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "киви",
+      category: "Фрукты",
+      red: ["ужевика", "дыня", "сл. вишня", "гуава", "манго", "яблоко", "банан"],
+      orange: [],
+      green: [],
+      blue: ["фейхоа", "клубника", "сыр", "папайа", "сидр", "портвейн"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "к. вишня2",
+      category: "Ягоды",
+      red: ["бергамот", "базилик", "мелисса", "портвейн", "имб. пиво", "бузина", "корица", "томат"],
+      orange: ["бренди", "ч. чай", "роза"],
+      green: ["клюква", "виноград", "сл. вишня", "клубника", "лайм", "эстрагон", "мед", "т. шоколад", "бекон", "коньяк", "какао", "гвоздика"],
+      blue: ["асаи", "маракуйя", "яблоко", "джин", "жасмин"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "лимон",
+      category: "Цитрус",
+      red: ["водка", "ч. чай"],
+      orange: [],
+      green: ["виноград", "мандарин", "банан", "томат"],
+      blue: ["гранат", "малина", "брусника", "клубника", "виноград", "апельсин", "лайм", "мелисса", "эстрагон", "мед", "гр. орех", "салями", "груша", "гуава", "манго", "ром", "тимьян", "огурец"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "персик",
+      category: "Фрукты",
+      red: [],
+      orange: ["нектарин"],
+      green: ["малина", "слива", "эстрагон", "ч. чай", "абрикос"],
+      blue: ["сл. вишня", "клюква", "клубника", "морковь", "гуава", "папайа", "яблоко"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "шоколад",
+      category: "Десерт",
+      red: [],
+      orange: [],
+      green: ["клубника", "арахис", "бекон", "сыр", "ч. чай"],
+      blue: ["какао", "кокос"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
+      name: "слива",
+      category: "фрукты",
+      red: [],
+      orange: ["персик", "яблоко"],
+      green: ["малина", "канталуп", "клубника", "сл. вишня", "виноград", "арахис", "сыр", "бекон", "нектарин", "груша", "маракуйя", "банан", "гуава", "ч. чай", "виски", "ром"],
+      blue: ["земляника", "клюква", "базилик", "лавр", "т. шоколад", "огурец", "томат", "морковь", "абрикос", "манго", "з. чай"]
     },
     {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
-    },
-    {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
-    },
-    {
-      name: "",
-      category: "",
-      red: [""],
-      orange: [""],
-      green: [""],
-      blue: [""]
-    },
+      name: "клубника",
+      category: "Ягоды",
+      red: ["сыр", "гуава", "ананас", "т. пиво"],
+      orange: ["земляника", "мандарин", "кр. яблоко", "коньяк", "томат"],
+      green: ["малина", "т. шоколад", "сыр", "манго", "портвейн"],
+      blue: ["какао", "слив сыр", "томат", "бекон", "банан", "яблоко", "гуава", "виноград", "клюква", "сл. вишня", "фейхоа", "дыня", "зел. яблоко", "персик", "ч. чай"]
+    }
   ];
 
   private svg: any;
@@ -265,12 +249,15 @@ export class GraphComponent implements OnInit {
   private renderGraph(): void {
     d3.select('#graph-container').selectAll('*').remove();
 
+    const width = document.getElementById('graph-container')?.clientWidth ?? 800;
+    const height = 600;
+
     // Создаем SVG с контейнером для zoom
     this.svg = d3.select('#graph-container')
       .append('svg')
       .attr('width', '100%')
       .attr('height', '700px')
-      .attr('viewBox', '0 0 800 600');
+      .attr('viewBox', `0 0 ${width} ${height}`);
 
     const container = this.svg.append('g').classed('container', true);
 
@@ -297,16 +284,16 @@ export class GraphComponent implements OnInit {
         .distance(100)
       )
       .force('charge', d3.forceManyBody()
-        .strength(-150)
+        .strength(-300)
       )
       .force('collision', d3.forceCollide()
         .radius(35)
         .strength(0.8)
       )
-      .force('x', d3.forceX(400).strength(0.05))
-      .force('y', d3.forceY(300).strength(0.05))
+      .force('x', d3.forceX(width / 2).strength(0.1))
+      .force('y', d3.forceY(height / 2).strength(0.1))
       .alphaDecay(0.05)
-      .velocityDecay(0.4);
+      .velocityDecay(0.3);
 
     // Рисуем связи
     const link = container.append('g')
@@ -346,8 +333,8 @@ export class GraphComponent implements OnInit {
     this.simulation.on('tick', () => {
       // Ограничиваем позиции узлов
       visibleNodes.forEach(node => {
-        node.x = Math.max(50, Math.min(750, node.x ?? 400));
-        node.y = Math.max(50, Math.min(550, node.y ?? 300));
+        node.x = Math.max(20, Math.min(width - 20, node.x ?? width / 2));
+        node.y = Math.max(20, Math.min(height - 20, node.y ?? height / 2));
       });
 
       link
@@ -412,11 +399,12 @@ export class GraphComponent implements OnInit {
 
   getCategoryColor(category: string): string {
     const colors = {
-      'ягоды': '#ff6b6b',
-      'специи': '#feca57',
-      'фрукты': '#1dd1a1',
-      'овощи': '#54a0ff',
-      'напитки': '#5f27cd',
+      'Ягоды': '#ff6b6b',
+      'Цитрус': '#feca57',
+      'Фрукты': '#1dd1a1',
+      'Хвоя': '#0c830cff',
+      'Напитки': '#54a0ff',
+      'Десерт': '#c49c9cff',
       'Без категории': '#8395a7'
     };
     return colors[category as keyof typeof colors] || '#8395a7';
@@ -459,7 +447,7 @@ export class GraphComponent implements OnInit {
   })).sort((a, b) => a.category.localeCompare(b.category));
 }
 
-// Метод для фильтрации по выбранным продуктам
+// Метод отображает выбранные узлы со всеми связаннными ( в том числе не выбранными)
 applyProductFilter(): void {
   if (this.selectedProducts.length === 0) {
     this.applyFilter();
@@ -482,6 +470,29 @@ applyProductFilter(): void {
   this.filteredLinks = visibleLinks;
   this.graph.nodes.forEach(node => {
     node.hidden = !visibleNodes.has(node.id);
+  });
+
+  this.renderGraph();
+}
+
+// Метод отображает только выбранные узлы (и связи между ними, если есть)
+applyProductFilter2(): void {
+  if (this.selectedProducts.length === 0) {
+    this.applyFilter(); // Возвращаем обычную фильтрацию, если ничего не выбрано
+    return;
+  }
+
+  // Создаем Set для быстрого поиска выбранных продуктов
+  const selectedSet = new Set(this.selectedProducts);
+
+  // Фильтруем связи - оставляем только те, где И source И target выбраны
+  this.filteredLinks = this.graph.links.filter(link => 
+    selectedSet.has(link.source) && selectedSet.has(link.target)
+  );
+
+  // Фильтруем узлы - оставляем только выбранные
+  this.graph.nodes.forEach(node => {
+    node.hidden = !selectedSet.has(node.id);
   });
 
   this.renderGraph();
