@@ -1,0 +1,11 @@
+<div class="filter-controls">
+  <label *ngFor="let color of ['red', 'orange', 'green', 'blue']">
+    <input type="checkbox" 
+           [checked]="getFilterValue(color)"
+           (change)="toggleFilter(color)">
+    <span class="color-dot" [style.background]="getCompatibilityColor(color)"></span>
+    {{color}}
+  </label>
+</div>
+
+<div id="graph-container" class="graph-container"></div>
