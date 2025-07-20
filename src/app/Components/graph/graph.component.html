@@ -1,11 +1,43 @@
-<div class="filter-controls">
-  <label *ngFor="let color of ['red', 'orange', 'green', 'blue']">
-    <input type="checkbox" 
-           [checked]="getFilterValue(color)"
-           (change)="toggleFilter(color)">
-    <span class="color-dot" [style.background]="getCompatibilityColor(color)"></span>
-    {{color}}
-  </label>
-</div>
+    <div>
+    <div class="controls-container">
+    <div class="filter-controls">
+        <div class="color-filters">
+        <label *ngFor="let color of ['red', 'orange', 'green', 'blue']">
+            <input type="checkbox" 
+                [checked]="getFilterValue(color)"
+                (change)="toggleFilter(color)">
+            <span class="color-dot" [style.background]="getCompatibilityColor(color)"></span>
+            {{color}}
+        </label>
+        </div>
+    </div>
 
-<div id="graph-container" class="graph-container"></div>
+    <div class="product-filter">
+        <div class="search-box">
+        <input type="text" [(ngModel)]="searchTerm" 
+                placeholder="Поиск...">
+        </div>
+
+        <div class="product-list">
+        <div *ngFor="let group of filteredGroups" class="category-group">
+            <h4>{{group.category}}</h4>
+        <div class="product-items">
+    <div *ngFor="let item of group.items" class="product-item" (click)="toggleProductSelection(item.name)">
+        <input type="checkbox" 
+            [checked]="selectedProducts.includes(item.name)"
+            (click)="$event.stopPropagation()"> <!-- Предотвращаем двойное срабатывание -->
+        {{item.name}}
+    </div>
+    </div>
+        </div>
+        </div>
+
+        <button (click)="selectedProducts = []; applyProductFilter()" 
+                class="clear-btn">
+        Сбросить выбор
+        </button>
+    </div>
+    </div>
+
+    <div id="graph-container" class="graph-container"></div>
+    </div>

@@ -54,13 +54,127 @@ export class GraphComponent implements OnInit {
       category: "напитки",
       green: ["сл. вишня", "базилик", "п. мята", "шалфей", "мята", "бекон"],
       blue: ["лайм", "клюква", "мандарин", "канталуп", "эстрагон", "анис"]
-    }
+    },
+    {
+      name: "попкорн",
+      category: "десерт",
+      orange: ["кофе"],
+      green: ["какао", "вафли", "арахис", "хлеб", "сыр", "томат", "кукуруза", "ч. чай"],
+      blue: ["клубника", "бергамот", "мед", "ваниль", "яблоко", "салями", "тыква", "лосось"]
+    },
+    {
+      name: "кислая вишня",
+      category: "ягоды",
+      red: ["базилик"],
+      orange: ["корицы"],
+      green: ["сл. вишня", "клубника", "черника", "асаи", "клюква", "лавр", "эстрагон", "како", "т. шоколад", "гвоздика", "маракуя", "яблоко", "ч. чай", "портвейн", "жасмин"],
+      blue: ["облепиха", "бойсенбери", "малина", "слива", "ежевика", "лайм", "грейп", "лемонграсс", "шалфей", "сливочный сыр", "карамель", "лакрица", "анис", "нектарин", "персик", "банан", "абрикос", "з. чай", "кофе", "виски", "роза"], 
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
+    {
+      name: "",
+      category: "",
+      red: [""],
+      orange: [""],
+      green: [""],
+      blue: [""]
+    },
   ];
 
   private svg: any;
   private simulation: d3.Simulation<Node, d3.SimulationLinkDatum<Node>> | undefined;
   graph: { nodes: Node[]; links: Link[] } = { nodes: [], links: [] };
   filteredLinks: Link[] = [];
+  selectedProducts: string[] = [];
+  searchTerm: string = '';
+  groupedProducts: {category: string; items: {name: string, selected: boolean}[]}[] = [];
 
   filter: FilterOptions = {
     showRed: true,
@@ -71,12 +185,14 @@ export class GraphComponent implements OnInit {
 
   ngOnInit(): void {
     this.prepareGraphData();
+    this.groupProducts();
     this.renderGraph();
   }
 
   private prepareGraphData(): void {
     const allNodes = new Map<string, Node>();
     
+    this.data = this.data.filter(i => !!i.name);
     this.data.forEach(item => {
       allNodes.set(item.name, {
         id: item.name,
@@ -91,7 +207,7 @@ export class GraphComponent implements OnInit {
             allNodes.set(targetName, {
               id: targetName,
               name: targetName,
-              category: '?'
+              category: 'Без категории'
             });
           }
         });
@@ -153,7 +269,7 @@ export class GraphComponent implements OnInit {
     this.svg = d3.select('#graph-container')
       .append('svg')
       .attr('width', '100%')
-      .attr('height', '600px')
+      .attr('height', '700px')
       .attr('viewBox', '0 0 800 600');
 
     const container = this.svg.append('g').classed('container', true);
@@ -301,7 +417,7 @@ export class GraphComponent implements OnInit {
       'фрукты': '#1dd1a1',
       'овощи': '#54a0ff',
       'напитки': '#5f27cd',
-      '?': '#8395a7'
+      'Без категории': '#8395a7'
     };
     return colors[category as keyof typeof colors] || '#8395a7';
   }
@@ -322,4 +438,87 @@ export class GraphComponent implements OnInit {
     d.fx = null;
     d.fy = null;
   }
+
+ private groupProducts(): void {
+  const categories = new Map<string, string[]>();
+  
+  this.graph.nodes.forEach(node => {
+    const category = node.category || 'Без категории';
+    if (!categories.has(category)) {
+      categories.set(category, []);
+    }
+    categories.get(category)?.push(node.name);
+  });
+
+  this.groupedProducts = Array.from(categories.entries()).map(([category, items]) => ({
+    category,
+    items: items.map(name => ({
+      name,
+      selected: this.selectedProducts.includes(name) // Используем актуальный массив выбранных
+    })).sort((a, b) => a.name.localeCompare(b.name))
+  })).sort((a, b) => a.category.localeCompare(b.category));
+}
+
+// Метод для фильтрации по выбранным продуктам
+applyProductFilter(): void {
+  if (this.selectedProducts.length === 0) {
+    this.applyFilter();
+    return;
+  }
+
+  const visibleNodes = new Set<string>();
+  const visibleLinks: Link[] = [];
+
+  // Находим все связи для выбранных продуктов
+  this.graph.links.forEach(link => {
+    if (this.selectedProducts.includes(link.source) || 
+        this.selectedProducts.includes(link.target)) {
+      visibleNodes.add(link.source);
+      visibleNodes.add(link.target);
+      visibleLinks.push(link);
+    }
+  });
+
+  this.filteredLinks = visibleLinks;
+  this.graph.nodes.forEach(node => {
+    node.hidden = !visibleNodes.has(node.id);
+  });
+
+  this.renderGraph();
+}
+
+// Обработчик выбора продукта
+toggleProductSelection(product: string): void {
+  // Создаем новый массив вместо мутации
+  this.selectedProducts = this.selectedProducts.includes(product)
+    ? this.selectedProducts.filter(p => p !== product)
+    : [...this.selectedProducts, product];
+  
+  // Обновляем состояние в groupedProducts
+  this.groupedProducts = this.groupedProducts.map(group => ({
+    ...group,
+    items: group.items.map(item => ({
+      ...item,
+      selected: this.selectedProducts.includes(item.name)
+    }))
+  }));
+
+  this.applyProductFilter();
+}
+
+// Фильтрация для поиска
+get filteredGroups() {
+  if (!this.searchTerm) return this.groupedProducts;
+  
+  const term = this.searchTerm.toLowerCase();
+  return this.groupedProducts
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => 
+        item.name.toLowerCase().includes(term) ||
+        group.category.toLowerCase().includes(term)
+      )
+    }))
+    .filter(group => group.items.length > 0);
+}
 }

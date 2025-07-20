@@ -1,0 +1,10 @@
+/* styles.css (глобальный стиль) */
+html, body {
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+app-root {
+    display: block;
+    height: 100%;
+}
