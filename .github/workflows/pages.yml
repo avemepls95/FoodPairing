@@ -24,8 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      # Сайт лежит не в корне домена, а в /FoodPairing/
-      - run: npx ng build --base-href /FoodPairing/
+      # Сайт лежит не в корне домена, а в /food-pairing/
+      - run: npx ng build --base-href /food-pairing/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/food-pairing-hookah-frontend/browser
