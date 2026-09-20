@@ -1,29 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, inject, NgZone, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
+import { buildGraph, GraphLink, GraphNode, Level, PairingTable, Product } from './graph-data';
 
-interface FoodItem {
-  name: string;
-  category: string;
-  red?: string[];
-  orange?: string[];
-  green?: string[];
-  blue?: string[];
-}
-
-interface Node extends d3.SimulationNodeDatum {
-  id: string;
-  name: string;
-  category: string;
+interface Node extends GraphNode, d3.SimulationNodeDatum {
   hidden?: boolean;
 }
 
-interface Link {
-  source: string;
-  target: string;
-  value: 'red' | 'orange' | 'green' | 'blue';
-}
+type Link = GraphLink;
 
 interface GraphSettings {
   mode: 'strict' | 'extended'; // Два режима отображения
@@ -31,7 +15,7 @@ interface GraphSettings {
 
 interface FilterOptions {
   showRed: boolean;
-  showOrange: boolean;
+  showYellow: boolean;
   showGreen: boolean;
   showBlue: boolean;
 }
@@ -39,190 +23,68 @@ interface FilterOptions {
 @Component({
   selector: 'app-graph',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './graph.component.html',
   styleUrls: ['./graph.component.css']
 })
 export class GraphComponent implements OnInit {
-  data: FoodItem[] = [
-    {
-      name: "облепиха",
-      category: "Ягоды",
-      orange: ["клубника", "апельсин", "сыр", "манго", "портвейн"],
-      green: ["виноград", "клюква", "грейпфрут", "салями", "папайя", "виски", "сидр"],
-      blue: ["лавр", "какао", "гвоздика", "т. шоколад", "мандарин", "з. яблоко", 
-             "клубника", "ананас", "ром", "к. вишня", "банан", "ч. чай"]
-    },
-    {
-      name: "абсент",
-      category: "Напитки",
-      green: ["сл. вишня", "базилик", "п. мята", "шалфей", "мята", "бекон"],
-      blue: ["лайм", "клюква", "мандарин", "канталуп", "эстрагон", "анис"]
-    },
-    {
-      name: "попкорн",
-      category: "Десерт",
-      orange: ["кофе"],
-      green: ["какао", "вафли", "арахис", "хлеб", "сыр", "томат", "кукуруза", "ч. чай"],
-      blue: ["клубника", "бергамот", "мед", "ваниль", "з. яблоко", "салями", "тыква", "лосось"]
-    },
-    {
-      name: "к. вишня",
-      category: "Ягоды",
-      red: ["базилик"],
-      orange: ["корица"],
-      green: ["сл. вишня", "клубника", "черника", "асаи", "клюква", "лавр", "эстрагон", "какао", "т. шоколад", "гвоздика", "маракуйя", "з. яблоко", "ч. чай", "портвейн", "жасмин"],
-      blue: ["облепиха", "бойсенбери", "малина", "слива", "ежевика", "лайм", "грейпфрут", "лемонграсс", "шалфей", "слив. сыр", "карамель", "лакрица", "анис", "нектарин", "персик", "банан", "абрикос", "з. чай", "кофе", "виски", "роза"], 
-    },
-    {
-      name: "абрикос",
-      category: "Фрукты",
-      red: ["оливки", "персик", "нектарин", "коньяк", "джин", "водка"],
-      orange: ["кр. сухое", "имб. пиво"],
-      green: ["клубника", "малина", "эстрагон", "манго", "маракуйя", "ром"],
-      blue: ["черника", "клюква", "виноград", "бергамот", "базилик", "сыр", "салями", "банан", "слива", "ананас", "з. яблоко", "ч. чай", "портвейн", "шампанское", "бузина"]
-    },
-    {
-      name: "апельсин",
-      category: "Цитрус",
-      red: [],
-      orange: ["манго", "мандарин", "водка"],
-      green: ["ч. чай", "грейпфрут", "гуава", "малина", "кр. сухое"],
-      blue: ["ч. смородина", "личи", "эстрагон", "базилик", "кардамон", "морковь", "папайя", "з. яблоко", "портвейн", "клюква", "сл. вишня", "брусника", "черника", "роза", "бузина", "кардамон"]
-    },
-    {
-      name: "елки",
-      category: "Хвоя",
-      red: ["можжевельник", "арахис", "джин"],
-      orange: ["базилик"],
-      green: ["ч. перец", "лемонграсс", "эстрагон", "бекон", "салями", "морковь", "манго", "кардамон"],
-      blue: ["сл. вишня", "лимон", "мандарин", "грейпфрут", "бергамот", "лавр", "анис", "корица", "чили", "абсент", "водка"]
-    },
-    {
-      name: "киви",
-      category: "Фрукты",
-      red: ["ежевика", "дыня", "сл. вишня", "гуава", "манго", "з. яблоко", "банан"],
-      orange: [],
-      green: [],
-      blue: ["фейхоа", "клубника", "сыр", "папайя", "сидр", "портвейн"]
-    },
-    {
-      name: "к. вишня2",
-      category: "Ягоды",
-      red: ["бергамот", "базилик", "мелисса", "портвейн", "имб. пиво", "бузина", "корица", "томат"],
-      orange: ["бренди", "ч. чай", "роза"],
-      green: ["клюква", "виноград", "сл. вишня", "клубника", "лайм", "эстрагон", "мед", "т. шоколад", "бекон", "коньяк", "какао", "гвоздика"],
-      blue: ["асаи", "маракуйя", "з. яблоко", "джин", "жасмин"]
-    },
-    {
-      name: "лимон",
-      category: "Цитрус",
-      red: ["водка", "ч. чай"],
-      orange: [],
-      green: ["виноград", "мандарин", "банан", "томат"],
-      blue: ["гранат", "малина", "брусника", "клубника", "виноград", "апельсин", "лайм", "мелисса", "эстрагон", "мед", "гр. орех", "салями", "груша", "гуава", "манго", "ром", "тимьян", "огурец"]
-    },
-    {
-      name: "персик",
-      category: "Фрукты",
-      red: [],
-      orange: ["нектарин"],
-      green: ["малина", "слива", "эстрагон", "ч. чай", "абрикос"],
-      blue: ["сл. вишня", "клюква", "клубника", "морковь", "гуава", "папайя", "з. яблоко"]
-    },
-    {
-      name: "шоколад",
-      category: "Десерт",
-      red: [],
-      orange: [],
-      green: ["клубника", "арахис", "бекон", "сыр", "ч. чай"],
-      blue: ["какао", "кокос"]
-    },
-    {
-      name: "слива",
-      category: "фрукты",
-      red: [],
-      orange: ["персик", "з. яблоко"],
-      green: ["малина", "канталуп", "клубника", "сл. вишня", "виноград", "арахис", "сыр", "бекон", "нектарин", "груша", "маракуйя", "банан", "гуава", "ч. чай", "виски", "ром"],
-      blue: ["земляника", "клюква", "базилик", "лавр", "т. шоколад", "огурец", "томат", "морковь", "абрикос", "манго", "з. чай"]
-    },
-    {
-      name: "клубника",
-      category: "Ягоды",
-      red: ["сыр", "гуава", "ананас", "т. пиво"],
-      orange: ["земляника", "мандарин", "кр. яблоко", "коньяк", "томат"],
-      green: ["малина", "т. шоколад", "сыр", "манго", "портвейн"],
-      blue: ["какао", "слив. сыр", "томат", "бекон", "банан", "з. яблоко", "гуава", "виноград", "клюква", "сл. вишня", "фейхоа", "дыня", "з. яблоко", "персик", "ч. чай"]
-    }
-  ];
-
+  private zone = inject(NgZone);
   private svg: any;
+  private zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | undefined;
   private simulation: d3.Simulation<Node, d3.SimulationLinkDatum<Node>> | undefined;
+  filtersOpen = true;
+  modeHelpOpen = false;
+  graphEmpty = false;
   graph: { nodes: Node[]; links: Link[] } = { nodes: [], links: [] };
   filteredLinks: Link[] = [];
   selectedProducts: string[] = [];
   searchTerm: string = '';
-  groupedProducts: {category: string; items: {name: string, selected: boolean}[]}[] = [];
+  groupedProducts: {category: string; items: string[]}[] = [];
 
   filter: FilterOptions = {
     showRed: true,
-    showOrange: true,
-    showGreen: true,
-    showBlue: true
+    showYellow: false,
+    showGreen: false,
+    showBlue: false
   };
+
+  // По убыванию сочетаемости
+  readonly levels: { color: Level; label: string }[] = [
+    { color: 'red', label: 'Красный' },
+    { color: 'yellow', label: 'Жёлтый' },
+    { color: 'green', label: 'Зелёный' },
+    { color: 'blue', label: 'Синий' }
+  ];
 
   settings: GraphSettings = {
     mode: 'extended' // По умолчанию расширенный режим
   };
 
-  ngOnInit(): void {
-    this.prepareGraphData();
+  async ngOnInit(): Promise<void> {
+    const [tables, products] = await Promise.all([
+      fetch('data/tables.json').then(r => r.json() as Promise<PairingTable[]>),
+      fetch('data/products.json').then(r => r.json() as Promise<Product[]>)
+    ]);
+    this.graph = buildGraph(tables, products);
     this.groupProducts();
-    this.renderGraph();
+    this.applyFilter();
+
+    // Размер графа меняется при скрытии фильтров и повороте экрана
+    new ResizeObserver(() => this.zone.runOutsideAngular(() => this.fitToView()))
+      .observe(document.getElementById('graph-container')!);
   }
 
-  private prepareGraphData(): void {
-    const allNodes = new Map<string, Node>();
-    
-    this.data = this.data.filter(i => !!i.name);
-    this.data.forEach(item => {
-      allNodes.set(item.name, {
-        id: item.name,
-        name: item.name,
-        category: item.category
-      });
+  // pointerdown, а не click: iOS Safari не отправляет click в document при тапе по некликабельному элементу
+  @HostListener('document:pointerdown', ['$event'])
+  closeModeHelpOnOutsideClick(event: PointerEvent): void {
+    if (this.modeHelpOpen && !(event.target as Element).closest('.help')) {
+      this.modeHelpOpen = false;
+    }
+  }
 
-      ['red', 'orange', 'green', 'blue'].forEach(color => {
-        const items = item[color as keyof FoodItem] as string[] || [];
-        items.forEach(targetName => {
-          if (!allNodes.has(targetName)) {
-            allNodes.set(targetName, {
-              id: targetName,
-              name: targetName,
-              category: 'Без категории'
-            });
-          }
-        });
-      });
-    });
-
-    this.graph.nodes = Array.from(allNodes.values());
-
-    this.graph.links = [];
-    this.data.forEach(sourceItem => {
-      ['red', 'orange', 'green', 'blue'].forEach(color => {
-        const items = sourceItem[color as keyof FoodItem] as string[] || [];
-        items.forEach(targetName => {
-          this.graph.links.push({
-            source: sourceItem.name,
-            target: targetName,
-            value: color as 'red' | 'orange' | 'green' | 'blue'
-          });
-        });
-      });
-    });
-
-    this.applyFilter();
+  @HostListener('document:keydown.escape')
+  closeModeHelp(): void {
+    this.modeHelpOpen = false;
   }
 
   applyFilter(): void {
@@ -268,46 +130,56 @@ export class GraphComponent implements OnInit {
     this.graph.nodes.forEach(node => {
       node.hidden = !visibleNodes.has(node.id);
     });
+
+    this.graphEmpty = visibleNodes.size === 0;
   }
 
-  toggleViewMode(): void {
-    this.settings.mode = this.settings.mode === 'strict' ? 'extended' : 'strict';
+  setMode(mode: GraphSettings['mode']): void {
+    this.settings.mode = mode;
     this.applyFilter();
   }
 
   private shouldShowLink(link: Link): boolean {
     switch (link.value) {
       case 'red': return this.filter.showRed;
-      case 'orange': return this.filter.showOrange;
+      case 'yellow': return this.filter.showYellow;
       case 'green': return this.filter.showGreen;
       case 'blue': return this.filter.showBlue;
       default: return false;
     }
   }
 
+  // Вне зоны Angular: иначе каждый тик симуляции и событие drag/zoom запускают проверку изменений,
+  // и список продуктов перерисовывается прямо во время клика
   private renderGraph(): void {
+    this.zone.runOutsideAngular(() => this.drawGraph());
+  }
+
+  private drawGraph(): void {
     d3.select('#graph-container').selectAll('*').remove();
 
-    const width = document.getElementById('graph-container')?.clientWidth ?? 800;
-    const height = 600;
+    const containerElement = document.getElementById('graph-container');
+    const width = containerElement?.clientWidth || 800;
+    const height = containerElement?.clientHeight || 600;
 
     // Создаем SVG с контейнером для zoom
     this.svg = d3.select('#graph-container')
       .append('svg')
       .attr('width', '100%')
-      .attr('height', '700px')
-      .attr('viewBox', `0 0 ${width} ${height}`);
+      .attr('height', '100%')
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .style('display', 'block');
 
     const container = this.svg.append('g').classed('container', true);
 
-    // Настройка zoom
-    const zoom = d3.zoom()
-      .scaleExtent([0.5, 3])
+    // Настройка zoom. Нижняя граница маленькая: большой граф на телефоне вписывается с сильным уменьшением
+    this.zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.05, 4])
       .on('zoom', (event) => {
         container.attr('transform', event.transform);
       });
 
-    this.svg.call(zoom);
+    this.svg.call(this.zoom);
 
     const visibleNodes = this.graph.nodes.filter(node => !node.hidden);
     const d3Links = this.filteredLinks.map(link => ({
@@ -332,7 +204,13 @@ export class GraphComponent implements OnInit {
       .force('x', d3.forceX(width / 2).strength(0.1))
       .force('y', d3.forceY(height / 2).strength(0.1))
       .alphaDecay(0.05)
-      .velocityDecay(0.3);
+      .velocityDecay(0.3)
+      .stop();
+
+    // Раскладка считается сразу до конца, без анимации: вписать граф в экран можно только по итоговым позициям.
+    // Число тиков - столько, за сколько alpha опускается до alphaMin и симуляция сама бы остановилась
+    const ticksToSettle = Math.ceil(Math.log(this.simulation.alphaMin()) / Math.log(1 - this.simulation.alphaDecay()));
+    this.simulation.tick(ticksToSettle);
 
     // Рисуем связи
     const link = container.append('g')
@@ -368,14 +246,8 @@ export class GraphComponent implements OnInit {
       .classed('text-node', true)
       .call(this.wrapText, 60);
 
-    // Обновление позиций
-    this.simulation.on('tick', () => {
-      // Ограничиваем позиции узлов
-      visibleNodes.forEach(node => {
-        node.x = Math.max(20, Math.min(width - 20, node.x ?? width / 2));
-        node.y = Math.max(20, Math.min(height - 20, node.y ?? height / 2));
-      });
-
+    // Обновление позиций (при перетаскивании узла симуляция перезапускается)
+    const updatePositions = () => {
       link
         .attr('x1', (d: { source: { x: any; }; }) => d.source.x ?? 0)
         .attr('y1', (d: { source: { y: any; }; }) => d.source.y ?? 0)
@@ -388,7 +260,36 @@ export class GraphComponent implements OnInit {
 
       text
         .attr('transform', (d: { x: any; y: any; }) => `translate(${d.x ?? 0},${d.y ?? 0})`);
-    });
+    };
+    updatePositions();
+    this.simulation.on('tick', updatePositions);
+
+    this.fitToView();
+  }
+
+  // Масштаб и сдвиг, при которых все видимые узлы с подписями помещаются в контейнер. Крупнее 1:1 не увеличивает
+  private fitToView(): void {
+    const containerElement = document.getElementById('graph-container');
+    const nodes = this.graph.nodes.filter(node => !node.hidden);
+    if (!this.svg || !this.zoom || !containerElement?.clientWidth || !nodes.length) {
+      return;
+    }
+
+    const width = containerElement.clientWidth;
+    const height = containerElement.clientHeight;
+    this.svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    // Отступы под радиус узла и подпись: по бокам - половина ширины длинного слова, снизу - до трёх строк
+    const x0 = Math.min(...nodes.map(n => n.x ?? 0)) - 40;
+    const x1 = Math.max(...nodes.map(n => n.x ?? 0)) + 40;
+    const y0 = Math.min(...nodes.map(n => n.y ?? 0)) - 20;
+    const y1 = Math.max(...nodes.map(n => n.y ?? 0)) + 55;
+
+    const scale = Math.min(1, width / (x1 - x0), height / (y1 - y0));
+    const transform = d3.zoomIdentity
+      .translate(width / 2 - scale * (x0 + x1) / 2, height / 2 - scale * (y0 + y1) / 2)
+      .scale(scale);
+    this.svg.call(this.zoom.transform, transform);
   }
 
   private wrapText(selection: any, width: number) {
@@ -404,7 +305,12 @@ export class GraphComponent implements OnInit {
       let tspan = g.append('text')
         .attr('text-anchor', 'middle')
         .attr('font-size', `${fontSize}px`)
-        .attr('fill', '#333')
+        .attr('fill', '#1c1f24')
+        // Белая обводка под буквами - подпись читается поверх линий
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 3)
+        .attr('stroke-linejoin', 'round')
+        .attr('paint-order', 'stroke')
         .selectAll('tspan')
         .data(words)
         .enter()
@@ -423,19 +329,15 @@ export class GraphComponent implements OnInit {
   toggleFilter(color: string): void {
     const key = `show${color.charAt(0).toUpperCase()}${color.slice(1)}` as keyof FilterOptions;
     this.filter[key] = !this.filter[key];
-    
-    // Сохраняем выбранные продукты при обновлении
-    const currentSelected = [...this.selectedProducts];
     this.applyFilter();
-    this.selectedProducts = currentSelected;
   }
 
   getCompatibilityColor(value: string): string {
     const colors = {
-      red: '#ff0000',
-      orange: '#ffa500',
-      green: '#008000',
-      blue: '#0000ff'
+      red: '#e03131',
+      yellow: '#f0a800',
+      green: '#2f9e44',
+      blue: '#3b5bdb'
     };
     return colors[value as keyof typeof colors] || '#cccccc';
   }
@@ -445,9 +347,15 @@ export class GraphComponent implements OnInit {
       'Ягоды': '#ff6b6b',
       'Цитрус': '#feca57',
       'Фрукты': '#1dd1a1',
-      'Хвоя': '#0c830cff',
+      'Травы': '#6ab04c',
+      'Специи': '#e67e22',
+      'Орехи': '#8d6e63',
+      'Гастро': '#576574',
       'Напитки': '#54a0ff',
       'Десерт': '#c49c9cff',
+      'Цветы': '#f368e0',
+      'Растения': '#0c830cff',
+      'Овощи': '#5f27cd',
       'Без категории': '#8395a7'
     };
     return colors[category as keyof typeof colors] || '#8395a7';
@@ -483,65 +391,28 @@ export class GraphComponent implements OnInit {
 
   this.groupedProducts = Array.from(categories.entries()).map(([category, items]) => ({
     category,
-    items: items.map(name => ({
-      name,
-      selected: this.selectedProducts.includes(name) // Используем актуальный массив выбранных
-    })).sort((a, b) => a.name.localeCompare(b.name))
+    items: items.sort((a, b) => a.localeCompare(b))
   })).sort((a, b) => a.category.localeCompare(b.category));
 }
 
-// Метод отображает только выбранные узлы (и связи между ними, если есть)
-applyProductFilter2(): void {
-  if (this.selectedProducts.length === 0) {
-    this.applyFilter(); // Возвращаем обычную фильтрацию, если ничего не выбрано
-    return;
-  }
-
-  // Создаем Set для быстрого поиска выбранных продуктов
-  const selectedSet = new Set(this.selectedProducts);
-
-  // Фильтруем связи - оставляем только те, где И source И target выбраны
-  this.filteredLinks = this.graph.links.filter(link => 
-    selectedSet.has(link.source) && selectedSet.has(link.target)
-  );
-
-  // Фильтруем узлы - оставляем только выбранные
-  this.graph.nodes.forEach(node => {
-    node.hidden = !selectedSet.has(node.id);
-  });
-
-  this.renderGraph();
-}
-
-// Обработчик выбора продукта
 toggleProductSelection(product: string): void {
-  // Создаем новый массив вместо мутации
   this.selectedProducts = this.selectedProducts.includes(product)
     ? this.selectedProducts.filter(p => p !== product)
     : [...this.selectedProducts, product];
-  
-  // Обновляем состояние в groupedProducts
-  this.groupedProducts = this.groupedProducts.map(group => ({
-    ...group,
-    items: group.items.map(item => ({
-      ...item,
-      selected: this.selectedProducts.includes(item.name)
-    }))
-  }));
 
-    this.applyFilter();
+  this.applyFilter();
 }
 
 // Фильтрация для поиска
 get filteredGroups() {
   if (!this.searchTerm) return this.groupedProducts;
-  
+
   const term = this.searchTerm.toLowerCase();
   return this.groupedProducts
     .map(group => ({
       ...group,
-      items: group.items.filter(item => 
-        item.name.toLowerCase().includes(term) ||
+      items: group.items.filter(item =>
+        item.toLowerCase().includes(term) ||
         group.category.toLowerCase().includes(term)
       )
     }))

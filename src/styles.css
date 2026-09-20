@@ -1,1 +1,57 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface-hover: #eef0f3;
+  --border: #e2e5ea;
+  --border-strong: #c5cad3;
+  --text: #1c1f24;
+  --muted: #5d6470;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgb(16 24 40 / 6%), 0 4px 12px rgb(16 24 40 / 4%);
+  color-scheme: light;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+app-root {
+  display: block;
+}
+
+button, input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
