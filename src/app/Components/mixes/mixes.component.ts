@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavComponent } from '../nav/nav.component';
 import { isMixValid, Mix, MixCategory, MIX_MIN_ITEMS } from './mix';
@@ -13,6 +13,7 @@ import { MixesStore } from './mixes-store';
 })
 export class MixesComponent implements OnInit {
   private store = inject(MixesStore);
+  private formDialog = viewChild.required<ElementRef<HTMLDialogElement>>('formDialog');
 
   readonly stars = [1, 2, 3, 4, 5];
   readonly minItems = MIX_MIN_ITEMS;
@@ -21,6 +22,7 @@ export class MixesComponent implements OnInit {
   tab: MixCategory = 'tried';
   bestFirst = true;
   draft: Mix | undefined;
+  isNewMix = false;
 
   ngOnInit(): void {
     this.mixes = this.store.list();
@@ -37,30 +39,35 @@ export class MixesComponent implements OnInit {
     return this.mixes.filter(mix => mix.category === category).length;
   }
 
+  hasBrands(mix: Mix): boolean {
+    return mix.items.some(item => !!item.brand);
+  }
+
   addMix(): void {
-    if (!this.dropDraft()) {
-      return;
-    }
-    this.draft = {
+    this.isNewMix = true;
+    this.openDialog({
       id: crypto.randomUUID(),
       items: [{ flavor: '' }, { flavor: '' }],
       category: this.tab,
       updatedAt: new Date().toISOString()
-    };
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
   }
 
   editMix(mix: Mix): void {
-    if (!this.dropDraft()) {
-      return;
-    }
-    this.draft = { ...mix, items: mix.items.map(item => ({ ...item })) };
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.isNewMix = false;
+    this.openDialog({ ...mix, items: mix.items.map(item => ({ ...item })) });
   }
 
-  // Форма одна на странице, поэтому открыть вторую можно только выбросив незаконченную первую
-  private dropDraft(): boolean {
-    return !this.draft || confirm('Открытый микс не сохранён. Продолжить и потерять правки?');
+  closeDialog(): void {
+    this.formDialog().nativeElement.close();
+    this.draft = undefined;
+  }
+
+  // У модального окна клик мимо содержимого приходит на сам dialog
+  closeOnBackdrop(event: MouseEvent): void {
+    if (event.target === this.formDialog().nativeElement) {
+      this.closeDialog();
+    }
   }
 
   addItem(): void {
@@ -98,22 +105,14 @@ export class MixesComponent implements OnInit {
     });
     this.tab = this.draft.category;
     this.mixes = this.store.list();
-    this.draft = undefined;
-  }
-
-  cancelDraft(): void {
-    this.draft = undefined;
+    this.closeDialog();
   }
 
   removeMix(mix: Mix): void {
-    if (confirm(`Удалить микс "${this.title(mix)}"?`)) {
+    if (confirm(`Удалить микс "${mix.name || mix.items.map(item => item.flavor).join(' + ')}"?`)) {
       this.store.remove(mix.id);
       this.mixes = this.store.list();
     }
-  }
-
-  title(mix: Mix): string {
-    return mix.name || mix.items.map(item => item.flavor).join(' + ');
   }
 
   exportBackup(): void {
@@ -146,5 +145,11 @@ export class MixesComponent implements OnInit {
     } catch (error) {
       alert(`Не удалось прочитать файл: ${(error as Error).message}`);
     }
+  }
+
+  // Модальное окно: пока форма открыта, до остальных миксов не добраться
+  private openDialog(draft: Mix): void {
+    this.draft = draft;
+    this.formDialog().nativeElement.showModal();
   }
 }

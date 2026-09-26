@@ -23,75 +23,6 @@ app-nav {
   font-weight: 600;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 14px;
-}
-
-.rating-input, .items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.stars {
-  display: flex;
-  gap: 2px;
-}
-
-.star {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--border-strong);
-  fill: currentColor;
-  cursor: pointer;
-}
-
-.star.on {
-  color: #f0a800;
-}
-
-.item-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 6px;
-}
-
-.icon-btn {
-  display: grid;
-  place-items: center;
-  width: 38px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.icon-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
-  color: var(--text);
-}
-
-.icon-btn:disabled {
-  color: var(--border-strong);
-  cursor: default;
-}
-
-.add-item {
-  align-self: start;
-  min-height: 38px;
-}
-
-.form-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
 .tabs {
   display: flex;
   align-items: center;
@@ -102,72 +33,182 @@ app-nav {
   flex: 1;
 }
 
-.sort {
-  min-height: 38px;
+.tabs .segmented button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 6px;
   font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.tabs .badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 0.7rem;
+}
+
+.tabs .segmented button:not(.active) .badge {
+  background: var(--border);
+  color: var(--muted);
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 38px;
+  padding: 0 8px;
+  font-size: 0.8rem;
   white-space: nowrap;
 }
 
 .list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .mix {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 14px;
+  padding: 10px 12px;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+@media (hover: hover) {
+  .mix:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgb(16 24 40 / 8%), 0 8px 18px rgb(16 24 40 / 6%);
+  }
+
+  .mix:hover .icon-btn {
+    opacity: 1;
+  }
 }
 
 .mix-head {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  align-items: baseline;
+  gap: 8px;
 }
 
 .mix-title {
+  flex: 1;
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
-.mix-items {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.mix-body {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 10px;
 }
 
-.mix-items li {
-  padding-left: 12px;
-  border-left: 1px solid var(--border);
+/* Вкусы в строку: разделители не спорят с текстом */
+.flavors span + span::before {
+  content: " · ";
+  color: var(--border-strong);
 }
 
-.brand-name {
+.flavors {
+  flex: 1;
+  margin: 0;
+  min-width: 140px;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
-.brand-name::after {
-  content: " - ";
+.mix-title.flavors {
+  color: var(--text);
+}
+
+.flavors.with-brands span + span::before {
+  content: " • ";
+}
+
+.brand {
+  color: var(--border-strong);
+}
+
+.mix-title .brand {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.brand::after {
+  content: " ";
+}
+
+.stars {
+  display: flex;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.star {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #d3d7de;
+  fill: currentColor;
+  line-height: 0;
+}
+
+.star.on {
+  color: #f0a800;
+}
+
+.stars.big .star {
+  color: var(--border-strong);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+
+.stars.big .star:hover {
+  transform: scale(1.12);
 }
 
 .mix-actions {
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  align-self: center;
 }
 
-.mix-actions .btn {
-  min-height: 38px;
-  font-size: 0.88rem;
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.icon-btn:disabled {
+  color: #dcdfe5;
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .mix .icon-btn {
+    opacity: 0.55;
+  }
 }
 
 .empty {
-  padding: 24px 4px;
+  padding: 28px 4px;
   text-align: center;
 }
 
@@ -190,4 +231,118 @@ app-nav {
 
 .backup .hint {
   flex-basis: 100%;
+}
+
+/* Форма микса */
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog {
+  width: min(520px, 100%);
+  overflow: hidden;
+  max-height: 90dvh;
+  padding: 0;
+  border: 0;
+  border-radius: 20px 20px 0 0;
+  margin: auto auto 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 -8px 40px rgb(16 24 40 / 18%);
+}
+
+.dialog::backdrop {
+  background: rgb(16 24 40 / 45%);
+}
+
+/* Анимация только на появление: при закрытии форма пропадает из разметки сразу */
+.dialog[open] {
+  animation: sheet-in 0.2s ease-out;
+}
+
+.dialog[open]::backdrop {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 10px 10px 16px;
+}
+
+.dialog-head h2 {
+  flex: 1;
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.dialog-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  gap: 14px;
+  padding: 0 16px 16px;
+  overflow-y: auto;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 6px;
+}
+
+.add-item {
+  align-self: start;
+  min-height: 38px;
+}
+
+.dialog-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+@media (min-width: 600px) {
+  .dialog {
+    border-radius: 20px;
+    margin: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mix, .stars.big .star {
+    transition: none;
+  }
+
+  .dialog[open], .dialog[open]::backdrop {
+    animation: none;
+  }
 }
