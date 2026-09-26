@@ -235,14 +235,9 @@ app-nav {
 
 /* Форма микса */
 
-.dialog[open] {
-  display: flex;
-  flex-direction: column;
-}
-
 .dialog {
   width: min(520px, 100%);
-  overflow: hidden;
+  overflow-y: auto;
   max-height: 90dvh;
   padding: 0;
   border: 0;
@@ -279,7 +274,12 @@ app-nav {
   }
 }
 
+/* Прокручивается само окно: высота содержимого через flex в разных движках считается по-разному */
 .dialog-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -296,12 +296,9 @@ app-nav {
 
 .dialog-body {
   display: flex;
-  flex: 1;
-  min-height: 0;
   flex-direction: column;
   gap: 14px;
   padding: 0 16px 16px;
-  overflow-y: auto;
 }
 
 .field {
@@ -322,6 +319,8 @@ app-nav {
 }
 
 .dialog-actions {
+  position: sticky;
+  bottom: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
