@@ -1,6 +1,7 @@
 import { Component, HostListener, inject, NgZone, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
+import { NavComponent } from '../nav/nav.component';
 import { buildGraph, GraphLink, GraphNode, Level, PairingTable, Product } from './graph-data';
 
 interface Node extends GraphNode, d3.SimulationNodeDatum {
@@ -23,7 +24,7 @@ interface FilterOptions {
 @Component({
   selector: 'app-graph',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, NavComponent],
   templateUrl: './graph.component.html',
   styleUrls: ['./graph.component.css']
 })

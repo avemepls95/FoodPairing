@@ -13,12 +13,8 @@
   padding: 2px 2px 0 6px;
 }
 
-.title {
-  flex: 1;
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+app-nav {
+  margin-right: auto;
 }
 
 .filters-toggle {
@@ -40,32 +36,12 @@
   background: var(--surface-hover);
 }
 
-.badge {
-  display: inline-grid;
-  place-items: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--text);
-  color: var(--surface);
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
 .workspace {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.controls, .graph-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
 }
 
 .controls {
@@ -88,19 +64,6 @@
 .section-label {
   font-size: 0.85rem;
   font-weight: 600;
-}
-
-.hint {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--muted);
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
 }
 
 .legend-head {
@@ -168,30 +131,8 @@
   gap: 6px;
 }
 
-.segmented {
+.mode .segmented {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding: 3px;
-  background: var(--bg);
-  border-radius: var(--radius-sm);
-}
-
-.segmented button {
-  min-height: 36px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 0.88rem;
-  cursor: pointer;
-}
-
-.segmented button.active {
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-  box-shadow: 0 1px 3px rgb(16 24 40 / 14%);
 }
 
 .help {
@@ -256,27 +197,6 @@
   flex-direction: column;
 }
 
-.search {
-  width: 100%;
-  min-height: 42px;
-  padding: 0 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
-  /* Меньше 16px - iOS зумит страницу при фокусе */
-  font-size: 16px;
-  transition: border-color 0.15s, background-color 0.15s;
-}
-
-.search:focus {
-  background: var(--surface);
-  border-color: var(--border-strong);
-}
-
-.search::placeholder {
-  color: var(--muted);
-}
-
 .product-list {
   flex: 1;
   min-height: 0;
@@ -337,21 +257,7 @@
 
 .clear-btn {
   flex-shrink: 0;
-  min-height: 42px;
   margin-top: 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  cursor: pointer;
-}
-
-.clear-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
-}
-
-.clear-btn:disabled {
-  color: var(--muted);
-  cursor: default;
 }
 
 .graph-card {
